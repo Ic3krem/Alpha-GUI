@@ -79,7 +79,13 @@ public class User extends JFrame {
         workoutTracker.setBounds(83, 569, 234, 47);        
 
         logOut = new JButton("Log out");
-        logOut.setBounds(144, 642, 112, 40);   
+        logOut.setBounds(144, 642, 112, 40);  
+        logOut.addActionListener(e -> {
+            dispose(); 
+            SwingUtilities.invokeLater(() -> {
+                new loginp().setVisible(true); 
+            });
+        });   
 
         statusLabel = new JLabel("New label");
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
