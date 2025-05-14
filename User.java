@@ -9,12 +9,15 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class User extends JFrame {
-	private CardLayout contentLayout;
-	private JPanel contentPanel;
+    private CardLayout contentLayout;
+    private JPanel contentPanel;
     private static final long serialVersionUID = 1L;
     private JPanel userPanel, menu, panel;
     private JLabel status, statusLabel, homeIcon;
     private JButton checkIn, checkOut, bodyStats, attendanceTracker, workoutTracker, logOut;
+    
+    private UserAttendance useratt;
+    private int currentRow = -1;
 
     public User() {
         setTitle("User Panel");
@@ -51,8 +54,7 @@ public class User extends JFrame {
             timeLabel.setText(time);
         });
         timer.start();
-
-        
+     
 
         status = new JLabel("Status");
         status.setHorizontalAlignment(SwingConstants.CENTER);
@@ -63,17 +65,41 @@ public class User extends JFrame {
         checkIn = new JButton("Check in");
         checkIn.setBackground(new Color(128, 255, 128));
         checkIn.setBounds(83, 378, 107, 47);
+        checkIn.addActionListener(e -> {
+            if (currentRow == -1) {
+                String logId = String.format("%03d", useratt.getTableModel().getRowCount() + 1);
+                String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                String checkInTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
+
+                useratt.getTableModel().addRow(new Object[]{logId, date, checkInTime, ""});
+                currentRow = useratt.getTableModel().getRowCount() - 1;
+                statusLabel.setText("Checked In");
+            } else {
+                JOptionPane.showMessageDialog(this, "You already checked in today!", "Notice", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
 
         checkOut = new JButton("Check out");
         checkOut.setBackground(new Color(255, 128, 128));
-        checkOut.setBounds(210, 378, 107, 47);        
+        checkOut.setBounds(210, 378, 107, 47);
+        checkOut.addActionListener(e -> {
+            if (currentRow != -1) {
+                String checkOutTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
+                useratt.getTableModel().setValueAt(checkOutTime, currentRow, 3);
+                statusLabel.setText("Checked Out");
+                currentRow = -1;
+            } else {
+                JOptionPane.showMessageDialog(this, "You need to check in first!", "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+        });
 
         bodyStats = new JButton("Check Body Stats");
         bodyStats.setBounds(83, 445, 234, 47);
         bodyStats.addActionListener(e -> contentLayout.show(contentPanel, "bodyStats"));
 
         attendanceTracker = new JButton("Attendance Tracker");
-        attendanceTracker.setBounds(83, 510, 234, 47);        
+        attendanceTracker.setBounds(83, 510, 234, 47);
+        attendanceTracker.addActionListener(e -> contentLayout.show(contentPanel, "useratt"));
 
         workoutTracker = new JButton("Workout Tracker");
         workoutTracker.setBounds(83, 569, 234, 47);        
@@ -85,13 +111,13 @@ public class User extends JFrame {
             SwingUtilities.invokeLater(() -> {
                 new loginp().setVisible(true); 
             });
-        });   
+        });
 
-        statusLabel = new JLabel("New label");
+        statusLabel = new JLabel("Inactive");
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         statusLabel.setForeground(Color.WHITE);
         statusLabel.setFont(new Font("Tahoma", Font.BOLD, 18));
-        statusLabel.setBounds(144, 292, 112, 32);
+        statusLabel.setBounds(83, 291, 234, 32);
 
         homeIcon = new JLabel("New label");
         homeIcon.setBounds(185, 98, 30, 30);
@@ -151,25 +177,18 @@ public class User extends JFrame {
         contentPanel.setPreferredSize(new Dimension(800, 800));
 
         
-        Home homePanel = new Home();
+        Home homePanel = new Home(contentLayout, contentPanel);
         UserBodystats bodystats = new UserBodystats();
+        useratt = new UserAttendance();
 
         contentPanel.add(homePanel, "home");
-        contentPanel.add(bodystats, "bodyStats"); 
+        contentPanel.add(bodystats, "bodyStats");
+        contentPanel.add(useratt, "useratt");
 
         userPanel.add(contentPanel, BorderLayout.EAST);
 
         // Set default panel
         contentLayout.show(contentPanel, "home");
-
-        
-        bodyStats.addActionListener(e -> contentLayout.show(contentPanel, "bodyStats"));
-        
       
-        
-        
     }
-    
-    
-
 }
