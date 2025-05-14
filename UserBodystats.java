@@ -1,14 +1,11 @@
 package main;
 
 import java.awt.Color;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
 import java.awt.Font;
-import javax.swing.JTextField;
-import javax.swing.JSpinner;
-import javax.swing.JButton;
-import javax.swing.JTable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class UserBodystats extends JPanel {
 
@@ -60,11 +57,11 @@ public class UserBodystats extends JPanel {
 	        spinnerAge.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
 	        spinnerAge.setBounds(444, 190, 286, 53);        
 	
-	        spinnerHeight = new JSpinner();
+	        spinnerHeight = new JSpinner(new SpinnerNumberModel(170.0, 0.0, 300.0, 0.1));
 	        spinnerHeight.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
-	        spinnerHeight.setBounds(444, 300, 130, 53);        
+	        spinnerHeight.setBounds(444, 300, 130, 53);
 	
-	        spinnerWeight = new JSpinner();
+	        spinnerWeight = new JSpinner(new SpinnerNumberModel(70.0, 0.0, 300.0, 0.1));
 	        spinnerWeight.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
 	        spinnerWeight.setBounds(600, 300, 130, 53);        
 	
@@ -72,13 +69,78 @@ public class UserBodystats extends JPanel {
 	        computeBMI.setForeground(Color.WHITE);
 	        computeBMI.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
 	        computeBMI.setBackground(new Color(42, 158, 222));
-	        computeBMI.setBounds(67, 300, 150, 53);       
+	        computeBMI.setBounds(67, 300, 150, 53);
+	        computeBMI.addActionListener(e -> {
+	            try {
+	                double heightCm = (Double) spinnerHeight.getValue();
+	                double weightKg = (Double) spinnerWeight.getValue();
+	                double heightM = heightCm / 100.0;
+	
+	                if (heightM <= 0 || weightKg <= 0) {
+	                    results.setText("Please enter valid height and weight.");
+	                    return;
+	                }
+	
+	                double bmi = weightKg / (heightM * heightM);
+	                String classification;
+	
+	                if (bmi < 18.5) {
+	                    classification = "Underweight";
+	                } else if (bmi < 24.9) {
+	                    classification = "Normal";
+	                } else if (bmi < 29.9) {
+	                    classification = "Overweight";
+	                } else {
+	                    classification = "Obese";
+	                }
+	
+	                results.setText(String.format("BMI: %.2f (%s)", bmi, classification));
+	            } catch (Exception ex) {
+	                results.setText("Error computing BMI.");
+	                ex.printStackTrace();
+	            }
+	        });       
 	
 	        updateBMI = new JButton("Update BMI");
 	        updateBMI.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
 	        updateBMI.setForeground(Color.WHITE);
 	        updateBMI.setBackground(new Color(233, 0, 32));
 	        updateBMI.setBounds(247, 300, 150, 53);
+	        updateBMI.addActionListener(e -> {
+	            try {
+	                double heightCm = (Double) spinnerHeight.getValue();
+	                double weightKg = (Double) spinnerWeight.getValue();
+	                double heightM = heightCm / 100.0;
+	
+	                if (heightM <= 0 || weightKg <= 0) {
+	                    results.setText("Please enter valid height and weight.");
+	                    return;
+	                }
+	
+	                double bmi = weightKg / (heightM * heightM);
+	                String classification;
+	
+	                if (bmi < 18.5) {
+	                    classification = "Underweight";
+	                } else if (bmi < 24.9) {
+	                    classification = "Normal";
+	                } else if (bmi < 29.9) {
+	                    classification = "Overweight";
+	                } else {
+	                    classification = "Obese";
+	                }
+	
+	                results.setText(String.format("BMI: %.2f (%s)", bmi, classification));
+	                
+	                int nextId = tableModel.getRowCount() + 1;
+	                String recordId = String.format("%03d", nextId);
+	                String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+	                tableModel.addRow(new Object[]{recordId, date, String.format("%.2f", bmi), classification});
+	            } catch (Exception ex) {
+	                results.setText("Error updating BMI.");
+	                ex.printStackTrace();
+	            }
+	        });
 	        
 	        results = new JTextField();
 	        results.setForeground(new Color(240, 233, 0));
@@ -87,25 +149,28 @@ public class UserBodystats extends JPanel {
 	        results.setBounds(67, 364, 330, 53);
 	        results.setColumns(10);
 	        results.setEditable(false);
-	
-	        table = new JTable();
-	        table.setBounds(67, 428, 663, 285);
+		
+	        String[] columnNames = {"Record ID", "Date Recorded", "BMI", "Classification"};
+	        tableModel = new DefaultTableModel(columnNames, 0);
+	        table = new JTable(tableModel);
+	        JScrollPane scrollPane = new JScrollPane(table);
+	        scrollPane.setBounds(67, 428, 663, 285);
         
                 
                 
-        add(table);
-        add(results);
-        add(updateBMI);
-        add(computeBMI);
-        add(spinnerWeight);
-        add(spinnerHeight);
-        add(spinnerAge);
-        add(textField);
-        add(weightLabel);
-        add(heightLabel);
-        add(ageLabel);
-        add(bmiLabel);
+	add(lblNewLabel);
         add(nameLabel);
-        add(lblNewLabel);
+        add(Name);
+        add(ageLabel);
+        add(spinnerAge);
+        add(bmiLabel);
+        add(heightLabel);
+        add(spinnerHeight);
+        add(weightLabel);
+        add(spinnerWeight);
+        add(computeBMI);
+        add(updateBMI);
+        add(results);
+        add(scrollPane);
     }
 }
